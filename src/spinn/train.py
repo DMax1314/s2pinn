@@ -14,12 +14,10 @@ from spinn.pdes.stochastic_burgers_2d import StochasticBurgers2D
 from spinn.pdes.stochastic_darcy_2d import StochasticDarcy2D
 from spinn.pdes.stochastic_darcy_mc_2d import StochasticDarcyMC2D
 from spinn.pdes.stochastic_diffusion_2d import StochasticDiffusion2D
-from spinn.pdes.stochastic_elliptic_2d import StochasticElliptic2D
 from spinn.pdes.stochastic_poisson_mc_2d import StochasticPoissonMC2D
 
 PDEType = Union[
     StochasticDiffusion2D,
-    StochasticElliptic2D,
     StochasticAllenCahn2D,
     StochasticBurgers2D,
     StochasticDarcy2D,
@@ -80,9 +78,7 @@ def build_pde(
         "z_distribution": cfg["model"]["stochastic"]["dist"],
     }
 
-    if pde_type == "elliptic":
-        return StochasticElliptic2D(**common_args)
-    elif pde_type == "diffusion":
+    if pde_type == "diffusion":
         return StochasticDiffusion2D(**common_args)
     elif pde_type == "allen_cahn":
         return StochasticAllenCahn2D(**common_args)
