@@ -1,0 +1,10 @@
+# Required dependencies for src/solvers/fenics reference solvers.
+# Install the binary FEniCSx stack from conda-forge first:
+#   mamba install -c conda-forge fenics-dolfinx=0.9 mpi4py petsc4py slepc4py
+#
+# The entries below document the Python packages used by the reference solvers.
+# Depending on the platform, installing them with pip alone may fail because
+# MPI, PETSc, SLEPc, and dolfinx require compiled system libraries.
+mpi4py
+petsc4py
+slepc4py

@@ -1,0 +1,104 @@
+# ============================================================
+# sÂ²PINN: Stochastic Separable PINN â€?Base Configuration
+# ============================================================
+
+# --- Model Architecture ---
+model:
+  # Spatial dictionary (Gaussian atoms + optional residual warp)
+  spatial:
+    n_atoms: 256           # M: number of spatial atoms
+    init_sigma: 0.15       # initial width of Gaussian atoms
+    use_warp: true         # enable residual coordinate warp
+    warp_hidden: 64        # warp MLP hidden size
+    warp_eps: 0.1          # warp amplitude scaling
+
+  # Temporal basis (DC + learnable-frequency Fourier)
+  temporal:
+    n_freq: 8              # K: number of frequency pairs => M_t = 1 + 2K = 17
+
+  # Stochastic basis (gPC)
+  stochastic:
+    R: 3                   # number of random dimensions
+    p: 3                   # total polynomial degree => G = C(R+p, p)
+    dist: "gaussian"       # base distribution: "gaussian" (Hermite) or "uniform" (Legendre)
+
+  # CP low-rank coupling core
+  cp:
+    rank: 16               # q: CP rank
+    init: "normal"         # initialization: "normal" or "orthogonal"
+
+# --- PDE Problem ---
+pde:
+  name: "stochastic_diffusion_2d"
+  domain:
+    x_min: -1.0
+    x_max: 1.0
+    y_min: -1.0
+    y_max: 1.0
+    t_min: 0.0
+    t_max: 1.0
+  # KL expansion for log-normal diffusion coefficient
+  kl:
+    n_terms: 3             # number of KL modes (should match R)
+    sigma: 1.0             # standard deviation of log-k field
+    corr_length: 1.0       # correlation length
+
+# --- Training ---
+training:
+  steps: 20000
+  lr: 1.0e-3
+  optimizer: "adam"
+  amp: "none"              # mixed precision: "bf16", "fp16", or "none" (use --amp bf16 for speed)
+  grad_accum: 1            # gradient accumulation steps
+
+  # Batch sizes (per mini-batch)
+  colloc: 32768            # PDE collocation points
+  bc: 32768                # boundary condition points
+  ic: 32768                # initial condition points
+  gram: 4096               # points for Gram matrix estimation
+
+  # Resampling
+  resample_every: 1        # resample collocation points every N steps
+
+  # Loss weights
+  w_pde: 1.0
+  w_proj: 1.0
+  w_bc: 1.0
+  w_ic: 1.0
+  w_orth: 1.0              # spatial Gram penalty weight
+  w_fac_orth: 0.1          # CP factor orthogonality weight
+
+  # CP factor column normalization
+  normalize_cp_every: 1    # normalize CP factors every N steps
+
+# --- Evaluation ---
+eval:
+  grid_res: 64             # spatial grid resolution per axis for evaluation
+  t_eval: [0.0, 0.5, 1.0] # time points for evaluation
+  z_eval:                  # stochastic realizations for evaluation
+    - name: "Z0"
+      values: [0.0, 0.0, 0.0]
+    - name: "Z_e1"
+      values: [1.0, 0.0, 0.0]
+    - name: "Z_e2"
+      values: [0.0, 1.0, 0.0]
+  eval_every: 500          # evaluate every N steps
+  save_checkpoint: true
+  uq:
+    enabled: true
+    n_probe: 2048
+    n_z_moment: 1024
+    n_z_interval: 1024
+    n_z_test: 1024
+    alpha: 0.1
+    batch_limit: 262144
+
+# --- Logging ---
+logging:
+  use_wandb: false
+  project: "s2pinn"
+  entity: null             # WandB entity (null = default)
+  log_every: 10            # log metrics every N steps
+
+# --- Reproducibility ---
+seed: 42

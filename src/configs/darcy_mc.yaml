@@ -1,0 +1,95 @@
+# ============================================================
+# sÂ²PINN: Non-Manufactured Stochastic Darcy Flow
+# ============================================================
+# PDE:  -div(k(x,y,Z) grad u) = 1.0    on  Omega = [-1,1]^2
+#       u = 0                           on  dOmega
+#
+# Diffusion coefficient:
+#   k(x,y,Z) = exp(mu_k + sigma * sum_i sqrt(lambda_i) Z_i phi_i(x,y))
+#
+# Key difference from Poisson MC:
+#   - Stochastic coefficient (log-normal KL field), constant source
+#   - Variable-coefficient elliptic: higher intrinsic tensor rank
+#
+# Reference: FDM Monte Carlo (generate_darcy_reference.py)
+# NO per-problem tuning: uses the same (R,p,q,M) as manufactured benchmarks.
+
+# --- Model Architecture (same as base.yaml) ---
+model:
+  spatial:
+    n_atoms: 256
+    init_sigma: 0.15
+    use_warp: true
+    warp_hidden: 64
+    warp_eps: 0.1
+  temporal:
+    n_freq: 0              # Steady-state: DC only (M_t = 1)
+  stochastic:
+    R: 5
+    p: 3
+    dist: "gaussian"
+  cp:
+    rank: 16
+    init: "normal"
+
+# --- PDE Problem ---
+pde:
+  type: "darcy_mc"
+  name: "stochastic_darcy_mc_2d"
+  domain:
+    x_min: -1.0
+    x_max: 1.0
+    y_min: -1.0
+    y_max: 1.0
+    t_min: 0.0
+    t_max: 1.0             # Dummy time domain (steady-state)
+  kl:
+    n_terms: 5
+    sigma: 1.0             # Log-normal field variance
+    corr_length: 1.0
+
+# --- Training (same as base.yaml defaults) ---
+training:
+  steps: 20000
+  lr: 1.0e-3
+  optimizer: "adam"
+  amp: "bf16"
+  grad_accum: 1
+  colloc: 32768
+  bc: 32768
+  ic: 100                  # Minimal (unused â€?w_ic = 0)
+  gram: 4096
+  resample_every: 1
+  w_pde: 1.0
+  w_proj: 1.0
+  w_bc: 1.0
+  w_ic: 0.0                # Steady-state: no initial condition
+  w_orth: 1.0
+  w_fac_orth: 0.1
+  normalize_cp_every: 1
+
+# --- Evaluation ---
+eval:
+  grid_res: 64
+  t_eval: [0.0]            # Evaluate at t=0 only (steady-state)
+  z_eval:
+    - name: "Z0"
+      values: [0.0, 0.0, 0.0, 0.0, 0.0]
+    - name: "Z_e1"
+      values: [1.0, 0.0, 0.0, 0.0, 0.0]
+    - name: "Z_e2"
+      values: [0.0, 1.0, 0.0, 0.0, 0.0]
+  eval_every: 500
+  save_checkpoint: true
+  uq:
+    enabled: false          # No exact solution â†?UQ eval handled by eval_darcy_mc.py
+
+# --- Logging ---
+logging:
+  use_wandb: false
+  project: "s2pinn"
+  entity: null
+  log_every: 10
+
+# --- Reproducibility ---
+seed: 42

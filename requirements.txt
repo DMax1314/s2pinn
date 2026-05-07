@@ -1,0 +1,13 @@
+torch>=2.0
+numpy
+scipy
+matplotlib
+pyyaml
+tqdm
+pandas
+scikit-learn
+UQpy
+
+# Required reference-solver stack: install FEniCSx/dolfinx, UFL, MPI, PETSc,
+# and SLEPc through conda-forge before running pip installs, e.g.
+# mamba install -c conda-forge fenics-dolfinx=0.9 mpi4py petsc4py slepc4py

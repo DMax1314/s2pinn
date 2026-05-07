@@ -1,0 +1,82 @@
+# ============================================================
+# sÂ²PINN: Stochastic Separable PINN â€?Elliptic Configuration
+# ============================================================
+
+model:
+  spatial:
+    n_atoms: 256
+    init_sigma: 0.15
+    use_warp: true
+    warp_hidden: 64
+    warp_eps: 0.1
+
+  temporal:
+    n_freq: 0              # No temporal variation (DC only)
+
+  stochastic:
+    R: 3
+    p: 3
+    dist: "gaussian"
+
+  cp:
+    rank: 16
+    init: "normal"
+
+pde:
+  type: "elliptic"         # Use StochasticElliptic2D
+  name: "stochastic_elliptic_2d"
+  domain:
+    x_min: -1.0
+    x_max: 1.0
+    y_min: -1.0
+    y_max: 1.0
+    t_min: 0.0
+    t_max: 1.0             # Dummy time domain
+  kl:
+    n_terms: 3
+    sigma: 1.0
+    corr_length: 1.0
+
+training:
+  steps: 20000
+  lr: 1.0e-3
+  optimizer: "adam"
+  amp: "none"
+  grad_accum: 1
+
+  colloc: 32768
+  bc: 32768
+  ic: 100                  # Minimal sampling (unused in loss)
+  gram: 4096
+
+  resample_every: 1
+
+  w_pde: 1.0
+  w_proj: 1.0
+  w_bc: 1.0
+  w_ic: 0.0                # Disable IC loss for elliptic problem
+  w_orth: 1.0
+  w_fac_orth: 0.1
+
+  normalize_cp_every: 1
+
+eval:
+  grid_res: 64
+  t_eval: [0.0]            # Evaluate at t=0 only
+  z_eval:
+    - name: "Z0"
+      values: [0.0, 0.0, 0.0]
+    - name: "Z_e1"
+      values: [1.0, 0.0, 0.0]
+    - name: "Z_e2"
+      values: [0.0, 1.0, 0.0]
+  eval_every: 500
+  save_checkpoint: true
+
+logging:
+  use_wandb: false
+  project: "s2pinn"
+  entity: null
+  log_every: 10
+
+seed: 42

@@ -1,0 +1,81 @@
+model:
+  spatial:
+    n_atoms: 256
+    init_sigma: 0.15
+    use_warp: true
+    warp_hidden: 64
+    warp_eps: 0.1
+
+  temporal:
+    n_freq: 8
+
+  stochastic:
+    R: 1
+    p: 3
+    dist: "gaussian"
+
+  cp:
+    rank: 16
+    init: "normal"
+
+pde:
+  type: "diffusion"
+  name: "stochastic_diffusion_2d"
+  domain:
+    x_min: -1.0
+    x_max: 1.0
+    y_min: -1.0
+    y_max: 1.0
+    t_min: 0.0
+    t_max: 1.0
+  kl:
+    n_terms: 1
+    sigma: 1.0
+    corr_length: 1.0
+
+training:
+  steps: 5000
+  lr: 1.0e-3
+  optimizer: "adam"
+  amp: "none"
+  grad_accum: 1
+
+  colloc: 8192
+  bc: 8192
+  ic: 8192
+  gram: 1024
+
+  resample_every: 1
+
+  w_pde: 1.0
+  w_proj: 0.0
+  w_bc: 1.0
+  w_ic: 1.0
+  w_orth: 0.0
+  w_fac_orth: 0.0
+
+  normalize_cp_every: 0
+
+eval:
+  grid_res: 64
+  t_eval: [1.0]
+  z_eval:
+    - name: "Z0"
+      values: [0.0]
+    - name: "Z_e1"
+      values: [1.0]
+  eval_every: 0
+  save_checkpoint: false
+
+logging:
+  use_wandb: false
+  project: "s2pinn"
+  entity: null
+  log_every: 200
+
+seed: 42
+
+baseline:
+  hidden_dim: 128
+  n_layers: 4
+  activation: "tanh"

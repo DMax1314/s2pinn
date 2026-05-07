@@ -1,0 +1,39 @@
+seed: 42
+
+problem:
+  name: darcy_mc_r5
+  type: darcy_mc
+  R: 5
+  sigma: 1.0
+  corr_length: 1.0
+  mu_k: 0.0
+  f_value: 1.0
+  domain:
+    x: [-1.0, 1.0]
+    y: [-1.0, 1.0]
+    t: [0.0, 1.0]
+
+pc2:
+  p: 3
+  solver: ols
+  n_boundary: 4096
+  n_initial: 0
+  n_virtual: -1
+  n_error_points: 4096
+  n_validation: 4096
+  batch_size: 200000
+
+evaluation:
+  grid_res: 64
+  references:
+    mean: ~/s2PINN/data/darcy_mc_mean_R5_N10000_res64.pt
+    var: ~/s2PINN/data/darcy_mc_var_R5_N10000_res64.pt
+
+logging:
+  use_wandb: false
+  project: s2pinn
+  entity:
+
+output:
+  dir: ~/s2PINN/P2CE/results
+  save_model: false
