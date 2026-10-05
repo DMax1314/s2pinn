@@ -1,6 +1,16 @@
 # S2-PINN Code
 
-This directory contains the code used for the S2-PINN experiments:
+[Zhendong Li*](https://github.com/DMax1314),[Alwum Onwunta](https://sites.google.com/view/akwumonwunta/home)
+
+*Corresponding author.
+
+Conference on Neural Information Processing Systems (NeurIPS 2026)
+
+[Openreview](https://openreview.net/forum?id=lwTb5ix4w9), [ArXiv](https://arxiv.org/abs/2610.03303)
+
+---
+This directory contains the code used for the S2-PINN experiment
+
 
 - `src/spinn/`: S2-PINN models, stochastic PDE definitions, gPC utilities, and training loops.
 - `src/configs/`: YAML configurations for manufactured, non-manufactured, and inverse benchmarks.
@@ -48,4 +58,19 @@ Run the PC2 baseline:
 cd P2CE
 pip install -r requirements.txt
 python -m p2ce.runner --config configs/diffusion_r5.yaml
+```
+
+
+---
+## BibTeX
+```bibtex
+@misc{li2026s2pinn,
+      title={S$^{2}$-PINN: Stochastic Separable Physics-Informed Neural Networks},
+      author={Zhendong Li and Akwum Onwunta},
+      year={2026},
+      eprint={2610.03303},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2610.03303},
+}
 ```
